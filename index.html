@@ -505,7 +505,7 @@
     zone.replaceChildren(
       el("p", { class: "intro-res" }, "Le disque a choisi :"),
       el("div", { class: "album-choisi" },
-        album.pochette ? el("img", { src: album.pochette, alt: `Pochette de ${album.titre}` }) : null,
+        album.pochette ? el("img", { src: album.pochette, alt: `Pochette de ${album.titre}`, onerror: (e) => e.target.remove() }) : null,
         el("div", {},
           el("h3", {}, album.titre || "Sans titre"),
           el("p", { class: "artiste" }, album.artiste || ""),
