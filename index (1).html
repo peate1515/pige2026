@@ -1,0 +1,546 @@
+<!doctype html>
+<html lang="fr-CA">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ma liste de pige</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💿</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT,WONK@9..144,900,100,1&family=Karla:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --fond: #2A1440;
+    --fond-clair: #3B1F5A;
+    --creme: #FFF1E0;
+    --creme-douce: rgba(255, 241, 224, .72);
+    --ligne: rgba(255, 241, 224, .2);
+    --rose: #F0398B;
+    --orange: #FF8A2B;
+    --violet: #9B5DE5;
+    --turquoise: #22C3B5;
+    --vinyle: #140A1F;
+    --titre: "Fraunces", "Cooper Black", Georgia, serif;
+    --texte: "Karla", system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    background: var(--fond);
+    color: var(--creme);
+    font-family: var(--texte);
+    font-size: 1.0625rem;
+    line-height: 1.55;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  a { color: inherit; }
+  :focus-visible { outline: 3px solid var(--turquoise); outline-offset: 3px; border-radius: 6px; }
+
+  .bandeau {
+    background: var(--orange);
+    color: var(--fond);
+    padding: .6rem 1.25rem;
+    font-size: .95rem;
+  }
+
+  /* Les bandes rétro */
+  .bandes { display: grid; }
+  .bandes span { display: block; height: 14px; }
+  .bandes span:nth-child(1) { background: var(--rose); }
+  .bandes span:nth-child(2) { background: var(--orange); }
+  .bandes span:nth-child(3) { background: var(--turquoise); }
+  .bandes span:nth-child(4) { background: var(--violet); }
+
+  .page { max-width: 1120px; margin: 0 auto; padding: 0 1.25rem 4rem; }
+
+  .entete { padding: 3rem 0 1rem; max-width: 42rem; }
+  .entete h1 {
+    font-family: var(--titre);
+    font-weight: 900;
+    font-variation-settings: "SOFT" 100, "WONK" 1;
+    font-size: clamp(3rem, 9vw, 5.75rem);
+    line-height: .92;
+    letter-spacing: -.015em;
+    margin: 0 0 1.1rem;
+    color: var(--rose);
+    text-shadow: 3px 3px 0 var(--orange), 6px 6px 0 var(--turquoise);
+  }
+  .entete p { margin: 0; color: var(--creme-douce); font-size: 1.15rem; max-width: 34rem; }
+
+  .scene {
+    display: grid;
+    gap: 2.5rem;
+    align-items: center;
+    padding: 2rem 0 1rem;
+  }
+  @media (min-width: 860px) {
+    .scene { grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 4rem; }
+  }
+
+  .roue-wrap {
+    position: relative;
+    width: 100%;
+    max-width: 480px;
+    margin: 0 auto;
+    aspect-ratio: 1;
+  }
+  #roue { width: 100%; height: 100%; display: block; }
+  .aiguille {
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0; height: 0;
+    border-left: 16px solid transparent;
+    border-right: 16px solid transparent;
+    border-top: 32px solid var(--turquoise);
+    filter: drop-shadow(0 3px 2px rgba(0,0,0,.45));
+  }
+
+  form { display: grid; gap: .5rem; }
+  label { font-weight: 700; font-size: 1.1rem; }
+  .champ {
+    display: flex;
+    align-items: center;
+    background: var(--fond-clair);
+    border: 3px solid var(--ligne);
+    border-radius: 18px;
+    padding: 0 1rem;
+    max-width: 16rem;
+  }
+  .champ:focus-within { border-color: var(--turquoise); }
+  .champ input {
+    flex: 1;
+    min-width: 0;
+    background: transparent;
+    border: 0;
+    color: var(--creme);
+    font-family: var(--titre);
+    font-weight: 900;
+    font-variation-settings: "SOFT" 100;
+    font-size: 2.3rem;
+    padding: .3rem 0;
+  }
+  .champ input::placeholder { color: rgba(255, 241, 224, .3); }
+  .champ input:focus { outline: none; }
+  .champ span { font-family: var(--titre); font-weight: 900; font-size: 1.9rem; color: var(--creme-douce); }
+  .compte { margin: .25rem 0 .75rem; color: var(--creme-douce); min-height: 1.55em; }
+
+  button, .bouton {
+    font: 700 1.05rem/1 var(--texte);
+    border-radius: 999px;
+    padding: .95rem 1.6rem;
+    cursor: pointer;
+    border: 3px solid transparent;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .principal {
+    background: var(--turquoise); color: var(--fond); justify-self: start;
+    box-shadow: 4px 4px 0 var(--rose);
+  }
+  .principal:hover:not(:disabled) { background: #3AD6C8; }
+  .principal:active:not(:disabled) { transform: translate(2px, 2px); box-shadow: 2px 2px 0 var(--rose); }
+  .secondaire { background: transparent; color: var(--creme); border-color: var(--ligne); }
+  .secondaire:hover { border-color: var(--creme-douce); }
+  .confirmer { background: var(--rose); color: var(--creme); box-shadow: 4px 4px 0 var(--violet); }
+  .confirmer:hover:not(:disabled) { background: #F5559D; }
+  button:disabled { opacity: .45; cursor: not-allowed; }
+
+  .resultat {
+    margin-top: 2rem;
+    padding-top: 1.75rem;
+    border-top: 3px dashed var(--violet);
+  }
+  .resultat .intro-res { margin: 0 0 .75rem; color: var(--creme-douce); }
+  .album-choisi { display: flex; gap: 1.1rem; align-items: center; }
+  .album-choisi img {
+    width: 104px; height: 104px; object-fit: cover; border-radius: 4px; flex-shrink: 0;
+    box-shadow: 5px 5px 0 var(--rose);
+  }
+  .album-choisi h3 {
+    font-family: var(--titre); font-weight: 900;
+    font-variation-settings: "SOFT" 100, "WONK" 1;
+    font-size: clamp(1.7rem, 3.6vw, 2.3rem); line-height: 1.05; margin: 0;
+    color: var(--creme);
+  }
+  .album-choisi .artiste { margin: .3rem 0 0; color: var(--creme-douce); }
+  .album-choisi .prix { margin: .3rem 0 0; font-weight: 700; color: var(--orange); }
+  .rangee { display: flex; flex-wrap: wrap; gap: .7rem; margin-top: 1.25rem; }
+  .note { font-size: .92rem; color: var(--creme-douce); margin: .75rem 0 0; }
+  .message { margin: 1rem 0 0; font-weight: 700; }
+  .message.ok { color: var(--turquoise); }
+  .message.erreur { color: #FF9EC4; }
+
+  .pied { margin-top: 3rem; }
+
+  #confettis {
+    position: fixed; inset: 0; width: 100vw; height: 100vh;
+    pointer-events: none; z-index: 50;
+  }
+</style>
+</head>
+<body>
+<div id="bandeau-demo" class="bandeau" hidden>
+  Mode test : Firebase n'est pas configuré, donc les albums choisis sont gardés seulement dans ce navigateur.
+</div>
+<div class="bandes" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
+
+<div class="page">
+  <header class="entete">
+    <h1>Ma liste de pige</h1>
+    <p>Tu m'as pigé? Entre ton budget et fais tourner le disque. Il choisira pour toi un album qui entre dans ton budget.</p>
+  </header>
+
+  <main class="scene">
+    <div class="roue-wrap">
+      <canvas id="roue" role="img" aria-label="Disque qui tourne pour choisir un album"></canvas>
+      <div class="aiguille" aria-hidden="true"></div>
+    </div>
+
+    <section>
+      <form id="form-budget">
+        <label for="budget">Ton budget</label>
+        <div class="champ">
+          <input id="budget" type="text" inputmode="decimal" autocomplete="off" placeholder="30">
+          <span aria-hidden="true">$</span>
+        </div>
+        <p id="compte" class="compte" aria-live="polite"></p>
+        <button id="tourner" class="principal" type="submit">Faire tourner</button>
+      </form>
+      <div id="resultat" class="resultat" hidden aria-live="polite"></div>
+    </section>
+  </main>
+</div>
+<div class="bandes pied" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
+
+<canvas id="confettis" aria-hidden="true"></canvas>
+
+<script src="config.js"></script>
+<script type="module">
+  const ALBUMS = (window.ALBUMS || []).map((a, i) => ({ ...a, id: String(a.id ?? "album-" + i), prix: Number(a.prix) || 0 }));
+  const argent = new Intl.NumberFormat("fr-CA", { style: "currency", currency: "CAD" });
+  // Couleurs des pointes du disque : [fond, texte]
+  const COULEURS = [["#9B5DE5", "#FFF1E0"], ["#F0398B", "#FFF1E0"], ["#FF8A2B", "#2A1440"], ["#22C3B5", "#2A1440"], ["#5B2A86", "#FFF1E0"]];
+  const CONFETTIS = ["#9B5DE5", "#F0398B", "#FF8A2B", "#22C3B5", "#FFF1E0"];
+  const mouvementReduit = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  const $ = (id) => document.getElementById(id);
+  const cv = $("roue"), ctx = cv.getContext("2d");
+
+  let achats = {};
+  let candidats = [];
+  let angle = 0;
+  let enRotation = false;
+  let stockage = null;
+
+  // ---------- Petit utilitaire pour créer des éléments ----------
+  function el(tag, attrs = {}, ...enfants) {
+    const n = document.createElement(tag);
+    for (const [k, v] of Object.entries(attrs)) {
+      if (v == null || v === false) continue;
+      if (k === "class") n.className = v;
+      else if (k.startsWith("on")) n.addEventListener(k.slice(2), v);
+      else n.setAttribute(k, v);
+    }
+    for (const e of enfants) if (e != null) n.append(e);
+    return n;
+  }
+  const lienExterne = (href, texte, cls) =>
+    href ? el("a", { href, target: "_blank", rel: "noopener", class: cls }, texte) : null;
+
+  // ---------- Stockage : Firebase si configuré, sinon local ----------
+  async function creerStockage() {
+    const cfg = window.FIREBASE_CONFIG;
+    if (cfg && cfg.apiKey) {
+      const V = "10.12.2";
+      const { initializeApp } = await import(`https://www.gstatic.com/firebasejs/${V}/firebase-app.js`);
+      const fs = await import(`https://www.gstatic.com/firebasejs/${V}/firebase-firestore.js`);
+      const db = fs.getFirestore(initializeApp(cfg));
+      return {
+        ecouter(cb) {
+          fs.onSnapshot(fs.collection(db, "achats"), (snap) => {
+            const m = {};
+            snap.forEach((d) => (m[d.id] = d.data()));
+            cb(m);
+          }, (err) => {
+            console.error(err);
+            $("compte").textContent = "Impossible de lire la liste partagée. Vérifie la configuration Firebase et les règles.";
+          });
+        },
+        async reserver(id) {
+          const ref = fs.doc(db, "achats", id);
+          return fs.runTransaction(db, async (t) => {
+            const s = await t.get(ref);
+            if (s.exists()) return false;
+            t.set(ref, { achete: true, date: fs.serverTimestamp() });
+            return true;
+          });
+        }
+      };
+    }
+
+    $("bandeau-demo").hidden = false;
+    const CLE = "pige-albums-achats";
+    let rappel = () => {};
+    const lire = () => { try { return JSON.parse(localStorage.getItem(CLE)) || {}; } catch { return {}; } };
+    return {
+      ecouter(cb) { rappel = cb; cb(lire()); },
+      async reserver(id) {
+        const m = lire();
+        if (m[id]) return false;
+        m[id] = { achete: true, date: Date.now() };
+        try { localStorage.setItem(CLE, JSON.stringify(m)); } catch {}
+        rappel(m);
+        return true;
+      }
+    };
+  }
+
+  // ---------- Budget et albums admissibles ----------
+  function lireBudget() {
+    const brut = $("budget").value.replace(",", ".").replace(/[^\d.]/g, "");
+    const n = parseFloat(brut);
+    return Number.isFinite(n) && n > 0 ? n : null;
+  }
+
+  function majCandidats() {
+    const budget = lireBudget();
+    const dispo = ALBUMS.filter((a) => !achats[a.id]);
+    // Tant qu'il n'y a pas de budget, le disque reste vide pour garder la surprise
+    candidats = budget == null ? [] : dispo.filter((a) => a.prix <= budget);
+
+    let texte;
+    if (!ALBUMS.length) texte = "La liste est vide pour l'instant.";
+    else if (!dispo.length) texte = "Tous les albums ont déjà été choisis.";
+    else if (budget == null) texte = "Entre ton budget pour commencer.";
+    else if (!candidats.length) texte = "Aucun album restant n'entre dans ce budget. Essaie un montant un peu plus élevé.";
+    else texte = `${candidats.length} album${candidats.length > 1 ? "s entrent" : " entre"} dans ton budget.`;
+    $("compte").textContent = texte;
+    $("tourner").disabled = budget == null || !candidats.length;
+    dessiner();
+  }
+
+  // ---------- Dessin du disque ----------
+  function preparerCanvas() {
+    const taille = cv.clientWidth;
+    const dpr = window.devicePixelRatio || 1;
+    cv.width = Math.round(taille * dpr);
+    cv.height = Math.round(taille * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    dessiner();
+  }
+
+  function tronquer(t, max) { return t.length > max ? t.slice(0, max - 1) + "…" : t; }
+
+  function dessiner() {
+    const s = cv.clientWidth;
+    if (!s) return;
+    const c = s / 2, r = s / 2 - 4;
+    ctx.clearRect(0, 0, s, s);
+
+    ctx.beginPath(); ctx.arc(c, c, r, 0, Math.PI * 2);
+    ctx.fillStyle = "#140A1F"; ctx.fill();
+
+    const n = candidats.length;
+    if (n) {
+      const seg = (Math.PI * 2) / n;
+      const taillePolice = Math.max(11, Math.min(16, s / (n > 10 ? 34 : 28)));
+      candidats.forEach((a, i) => {
+        const d = angle + i * seg;
+        let couleur = COULEURS[i % COULEURS.length];
+        if (n > 1 && n % COULEURS.length === 1 && i === n - 1) couleur = COULEURS[2];
+        ctx.beginPath(); ctx.moveTo(c, c); ctx.arc(c, c, r - 5, d, d + seg); ctx.closePath();
+        ctx.fillStyle = couleur[0];
+        ctx.fill();
+        if (n > 1) { ctx.strokeStyle = "#140A1F"; ctx.lineWidth = 2.5; ctx.stroke(); }
+
+        ctx.save();
+        ctx.translate(c, c);
+        ctx.rotate(d + seg / 2);
+        ctx.textAlign = "right"; ctx.textBaseline = "middle";
+        ctx.fillStyle = couleur[1];
+        ctx.font = `700 ${taillePolice}px Karla, system-ui, sans-serif`;
+        ctx.fillText(tronquer(a.titre || "Sans titre", n > 10 ? 14 : 20), r - 20, 0);
+        ctx.restore();
+      });
+    }
+
+    // Sillons
+    ctx.strokeStyle = n ? "rgba(0,0,0,.18)" : "rgba(255,255,255,.05)"; ctx.lineWidth = 1;
+    for (let rr = r * 0.3; rr < r - 6; rr += 4.5) {
+      ctx.beginPath(); ctx.arc(c, c, rr, 0, Math.PI * 2); ctx.stroke();
+    }
+    // Reflet
+    const reflet = ctx.createLinearGradient(0, 0, s, s);
+    reflet.addColorStop(0, "rgba(255,255,255,.10)");
+    reflet.addColorStop(.5, "rgba(255,255,255,0)");
+    reflet.addColorStop(1, "rgba(255,255,255,.06)");
+    ctx.beginPath(); ctx.arc(c, c, r, 0, Math.PI * 2); ctx.fillStyle = reflet; ctx.fill();
+
+    // Étiquette centrale : cercles turquoise et rose
+    ctx.beginPath(); ctx.arc(c, c, r * 0.26, 0, Math.PI * 2); ctx.fillStyle = "#22C3B5"; ctx.fill();
+    ctx.beginPath(); ctx.arc(c, c, r * 0.2, 0, Math.PI * 2); ctx.fillStyle = "#F0398B"; ctx.fill();
+    ctx.save();
+    ctx.translate(c, c); ctx.rotate(angle);
+    ctx.fillStyle = "#FFF1E0";
+    ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    ctx.font = `900 ${Math.round(s / 17)}px Fraunces, "Cooper Black", Georgia, serif`;
+    ctx.fillText("pige", 0, -r * 0.09);
+    ctx.restore();
+    ctx.beginPath(); ctx.arc(c, c, Math.max(4, r * 0.03), 0, Math.PI * 2);
+    ctx.fillStyle = "#140A1F"; ctx.fill();
+  }
+
+  // ---------- Confettis ----------
+  function lancerConfettis() {
+    if (mouvementReduit) return;
+    const cc = $("confettis"), cx = cc.getContext("2d");
+    const dpr = window.devicePixelRatio || 1;
+    const L = window.innerWidth, H = window.innerHeight;
+    cc.width = L * dpr; cc.height = H * dpr;
+    cx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    const box = cv.getBoundingClientRect();
+    const ox = box.left + box.width / 2, oy = box.top + box.height * 0.2;
+    const morceaux = Array.from({ length: 160 }, () => {
+      const a = -Math.PI / 2 + (Math.random() - 0.5) * Math.PI * 1.1;
+      const v = 7 + Math.random() * 9;
+      return {
+        x: ox, y: oy,
+        vx: Math.cos(a) * v, vy: Math.sin(a) * v,
+        taille: 6 + Math.random() * 7,
+        rot: Math.random() * Math.PI, vr: (Math.random() - 0.5) * 0.3,
+        couleur: CONFETTIS[Math.floor(Math.random() * CONFETTIS.length)],
+        rond: Math.random() < 0.35
+      };
+    });
+
+    const t0 = performance.now(), duree = 3200;
+    function image(t) {
+      const p = (t - t0) / duree;
+      cx.clearRect(0, 0, L, H);
+      if (p >= 1) return;
+      cx.globalAlpha = p > 0.7 ? (1 - p) / 0.3 : 1;
+      for (const m of morceaux) {
+        m.vy += 0.28; m.vx *= 0.99; m.vy *= 0.99;
+        m.x += m.vx; m.y += m.vy; m.rot += m.vr;
+        cx.save(); cx.translate(m.x, m.y); cx.rotate(m.rot);
+        cx.fillStyle = m.couleur;
+        if (m.rond) { cx.beginPath(); cx.arc(0, 0, m.taille / 2, 0, Math.PI * 2); cx.fill(); }
+        else cx.fillRect(-m.taille / 2, -m.taille / 4, m.taille, m.taille / 2);
+        cx.restore();
+      }
+      requestAnimationFrame(image);
+    }
+    requestAnimationFrame(image);
+  }
+
+  // ---------- Rotation ----------
+  function tourner() {
+    if (enRotation || !candidats.length) return;
+    const lot = candidats.slice();
+    const n = lot.length, seg = (Math.PI * 2) / n, tour = Math.PI * 2;
+    const gagnant = Math.floor(Math.random() * n);
+    const decalage = (Math.random() - 0.5) * seg * 0.6;
+    const cible = -Math.PI / 2 - (gagnant + 0.5) * seg + decalage;
+    let delta = (((cible - angle) % tour) + tour) % tour;
+    delta += tour * (mouvementReduit ? 1 : 5 + Math.floor(Math.random() * 3));
+    const depart = angle, duree = mouvementReduit ? 700 : 4800;
+
+    enRotation = true;
+    $("tourner").disabled = true;
+    $("budget").disabled = true;
+    $("resultat").hidden = true;
+
+    const t0 = performance.now();
+    function image(t) {
+      const p = Math.min(1, (t - t0) / duree);
+      angle = depart + delta * (1 - Math.pow(1 - p, 4));
+      dessiner();
+      if (p < 1) return requestAnimationFrame(image);
+      angle %= tour;
+      enRotation = false;
+      $("budget").disabled = false;
+      lancerConfettis();
+      montrerResultat(lot[gagnant]);
+      majCandidats();
+    }
+    requestAnimationFrame(image);
+  }
+
+  // ---------- Résultat ----------
+  function montrerResultat(album) {
+    const zone = $("resultat");
+    const message = el("p", { class: "message" });
+    const confirmer = el("button", { class: "confirmer", type: "button" }, "Je l'achète");
+    const relancer = el("button", { class: "secondaire", type: "button", onclick: tourner }, "Tourner encore");
+    const choix = el("div", {},
+      el("div", { class: "rangee" }, confirmer, relancer),
+      el("p", { class: "note" }, "En confirmant, l'album sera retiré du disque pour les autres.")
+    );
+
+    confirmer.addEventListener("click", async () => {
+      confirmer.disabled = true;
+      relancer.disabled = true;
+      let ok = false;
+      try { ok = await stockage.reserver(album.id); } catch (e) { console.error(e); ok = false; }
+      if (ok) {
+        choix.remove();
+        message.className = "message ok";
+        message.textContent = `C'est noté! « ${album.titre} » est maintenant retiré du disque. Merci beaucoup!`;
+      } else {
+        message.className = "message erreur";
+        message.textContent = achats[album.id]
+          ? "Quelqu'un vient de choisir cet album. Fais tourner le disque de nouveau."
+          : "L'enregistrement n'a pas fonctionné. Vérifie ta connexion et réessaie.";
+        relancer.disabled = false;
+        if (!achats[album.id]) confirmer.disabled = false;
+      }
+    });
+
+    zone.replaceChildren(
+      el("p", { class: "intro-res" }, "Le disque a choisi :"),
+      el("div", { class: "album-choisi" },
+        album.pochette ? el("img", { src: album.pochette, alt: `Pochette de ${album.titre}` }) : null,
+        el("div", {},
+          el("h3", {}, album.titre || "Sans titre"),
+          el("p", { class: "artiste" }, album.artiste || ""),
+          el("p", { class: "prix" }, argent.format(album.prix))
+        )
+      ),
+      el("div", { class: "rangee" },
+        lienExterne(album.ecouter, "Écouter", "bouton secondaire"),
+        lienExterne(album.acheter, "Où l'acheter", "bouton secondaire")
+      ),
+      choix,
+      message
+    );
+    zone.hidden = false;
+  }
+
+  // ---------- Démarrage ----------
+  $("form-budget").addEventListener("submit", (e) => { e.preventDefault(); tourner(); });
+  $("budget").addEventListener("input", () => { if (!enRotation) majCandidats(); });
+  window.addEventListener("resize", preparerCanvas);
+  if (document.fonts) document.fonts.ready.then(dessiner);
+
+  preparerCanvas();
+  majCandidats();
+
+  try {
+    stockage = await creerStockage();
+    stockage.ecouter((m) => {
+      achats = m || {};
+      if (!enRotation) majCandidats();
+    });
+  } catch (e) {
+    console.error(e);
+    $("compte").textContent = "Impossible de se connecter à la liste partagée. Vérifie la configuration Firebase.";
+  }
+</script>
+</body>
+</html>
