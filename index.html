@@ -125,6 +125,20 @@
   .champ input::placeholder { color: rgba(255, 241, 224, .3); }
   .champ input:focus { outline: none; }
   .champ span { font-family: var(--titre); font-weight: 900; font-size: 1.9rem; color: var(--creme-douce); }
+  .taxes {
+    display: inline-flex; margin-top: .6rem; padding: 4px; gap: 4px;
+    background: var(--fond-clair); border: 2px solid var(--ligne); border-radius: 999px;
+    justify-self: start; border-inline: 2px solid var(--ligne);
+  }
+  .taxes legend { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  .taxes input { position: absolute; opacity: 0; pointer-events: none; }
+  .taxes label {
+    font-weight: 700; font-size: .95rem; padding: .5rem 1rem; border-radius: 999px;
+    cursor: pointer; color: var(--creme-douce);
+  }
+  .taxes input:checked + label { background: var(--violet); color: var(--creme); }
+  .taxes input:focus-visible + label { outline: 3px solid var(--turquoise); outline-offset: 2px; }
+  .taxes input:disabled + label { cursor: not-allowed; }
   .compte { margin: .25rem 0 .75rem; color: var(--creme-douce); min-height: 1.55em; }
 
   button, .bouton {
@@ -157,9 +171,16 @@
   }
   .resultat .intro-res { margin: 0 0 .75rem; color: var(--creme-douce); }
   .album-choisi { display: flex; gap: 1.1rem; align-items: center; }
-  .album-choisi img {
-    width: 104px; height: 104px; object-fit: cover; border-radius: 4px; flex-shrink: 0;
-    box-shadow: 5px 5px 0 var(--rose);
+  .pochette {
+    width: 104px; height: 104px; flex-shrink: 0; border-radius: 4px; overflow: hidden;
+    box-shadow: 5px 5px 0 var(--rose); background: var(--fond-clair);
+  }
+  .pochette img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .pochette.vide {
+    border-radius: 50%; box-shadow: none;
+    background:
+      radial-gradient(circle, var(--fond) 0 4%, var(--rose) 4% 16%, var(--turquoise) 16% 30%, transparent 30%),
+      repeating-radial-gradient(circle, #140A1F 0 2px, #22142F 2px 4px);
   }
   .album-choisi h3 {
     font-family: var(--titre); font-weight: 900;
@@ -208,6 +229,13 @@
           <input id="budget" type="text" inputmode="decimal" autocomplete="off" placeholder="30">
           <span aria-hidden="true">$</span>
         </div>
+        <fieldset class="taxes">
+          <legend>Prix affichés</legend>
+          <input type="radio" name="taxes" id="avant-taxes" value="avant" checked>
+          <label for="avant-taxes">Avant taxes</label>
+          <input type="radio" name="taxes" id="avec-taxes" value="avec">
+          <label for="avec-taxes">Avec taxes</label>
+        </fieldset>
         <p id="compte" class="compte" aria-live="polite"></p>
         <button id="tourner" class="principal" type="submit">Faire tourner</button>
       </form>
@@ -229,6 +257,23 @@
   const COULEURS = [["#9B5DE5", "#FFF1E0"], ["#F0398B", "#FFF1E0"], ["#FF8A2B", "#2A1440"], ["#22C3B5", "#2A1440"], ["#5B2A86", "#FFF1E0"]];
   const CONFETTIS = ["#9B5DE5", "#F0398B", "#FF8A2B", "#22C3B5", "#FFF1E0"];
   const mouvementReduit = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  // ---------- Codes secrets : dans Firebase, chaque album est enregistré sous un code
+  // illisible plutôt que sous son nom, pour que la personne pigée ne sache pas
+  // quels albums ont été choisis en regardant la base de données. ----------
+  const SEL = "pige2026:";
+  const CODES = {}, PAR_CODE = {};
+  async function coder(id) {
+    const octets = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(SEL + id));
+    return [...new Uint8Array(octets)].slice(0, 8).map((x) => x.toString(16).padStart(2, "0")).join("");
+  }
+  for (const a of ALBUMS) { const c = await coder(a.id); CODES[a.id] = c; PAR_CODE[c] = a.id; }
+  // Dans la console du navigateur : pigeCode("goo") donne le code d'un album (pour le décocher dans Firebase)
+  window.pigeCode = (texte) => {
+    const t = String(texte).toLowerCase();
+    return ALBUMS.filter((a) => a.id.includes(t) || (a.titre || "").toLowerCase().includes(t))
+      .map((a) => `${a.titre} : ${CODES[a.id]}`).join("\n") || "Aucun album trouvé.";
+  };
 
   const $ = (id) => document.getElementById(id);
   const cv = $("roue"), ctx = cv.getContext("2d");
@@ -303,6 +348,10 @@
   }
 
   // ---------- Budget et albums admissibles ----------
+  const TAUX_TAXES = 1.15;
+  const avecTaxes = () => $("avec-taxes").checked;
+  const prixFinal = (a) => Math.round(a.prix * (avecTaxes() ? TAUX_TAXES : 1) * 100) / 100;
+
   function lireBudget() {
     const brut = $("budget").value.replace(",", ".").replace(/[^\d.]/g, "");
     const n = parseFloat(brut);
@@ -313,7 +362,7 @@
     const budget = lireBudget();
     const dispo = ALBUMS.filter((a) => !achats[a.id]);
     // Tant qu'il n'y a pas de budget, le disque reste vide pour garder la surprise
-    candidats = budget == null ? [] : dispo.filter((a) => a.prix <= budget);
+    candidats = budget == null ? [] : dispo.filter((a) => prixFinal(a) <= budget);
 
     let texte;
     if (!ALBUMS.length) texte = "La liste est vide pour l'instant.";
@@ -350,7 +399,7 @@
     const n = candidats.length;
     if (n) {
       const seg = (Math.PI * 2) / n;
-      const taillePolice = Math.max(11, Math.min(16, s / (n > 10 ? 34 : 28)));
+      const taillePolice = n > 30 ? Math.max(9, s / 46) : Math.max(11, Math.min(16, s / (n > 10 ? 34 : 28)));
       candidats.forEach((a, i) => {
         const d = angle + i * seg;
         let couleur = COULEURS[i % COULEURS.length];
@@ -366,7 +415,7 @@
         ctx.textAlign = "right"; ctx.textBaseline = "middle";
         ctx.fillStyle = couleur[1];
         ctx.font = `700 ${taillePolice}px Karla, system-ui, sans-serif`;
-        ctx.fillText(tronquer(a.titre || "Sans titre", n > 10 ? 14 : 20), r - 20, 0);
+        ctx.fillText(tronquer(a.titre || "Sans titre", n > 30 ? 13 : n > 10 ? 14 : 20), r - 16, 0);
         ctx.restore();
       });
     }
@@ -456,6 +505,7 @@
     enRotation = true;
     $("tourner").disabled = true;
     $("budget").disabled = true;
+    document.querySelectorAll(".taxes input").forEach((i) => (i.disabled = true));
     $("resultat").hidden = true;
 
     const t0 = performance.now();
@@ -467,11 +517,31 @@
       angle %= tour;
       enRotation = false;
       $("budget").disabled = false;
+      document.querySelectorAll(".taxes input").forEach((i) => (i.disabled = false));
       lancerConfettis();
       montrerResultat(lot[gagnant]);
       majCandidats();
     }
     requestAnimationFrame(image);
+  }
+
+  // ---------- Pochette : lien direct, sinon via un relais d'images, sinon un vinyle ----------
+  function pochette(album) {
+    const boite = el("div", { class: "pochette" });
+    if (!album.pochette) { boite.classList.add("vide"); return boite; }
+    const sources = [
+      album.pochette,
+      `https://images.weserv.nl/?url=${encodeURIComponent(album.pochette)}&w=300`
+    ];
+    let essai = 0;
+    const img = el("img", { src: sources[0], alt: `Pochette de ${album.titre}`, referrerpolicy: "no-referrer" });
+    img.addEventListener("error", () => {
+      essai++;
+      if (essai < sources.length) img.src = sources[essai];
+      else { img.remove(); boite.classList.add("vide"); }
+    });
+    boite.append(img);
+    return boite;
   }
 
   // ---------- Résultat ----------
@@ -489,7 +559,7 @@
       confirmer.disabled = true;
       relancer.disabled = true;
       let ok = false;
-      try { ok = await stockage.reserver(album.id); } catch (e) { console.error(e); ok = false; }
+      try { ok = await stockage.reserver(CODES[album.id]); } catch (e) { console.error(e); ok = false; }
       if (ok) {
         choix.remove();
         message.className = "message ok";
@@ -507,11 +577,11 @@
     zone.replaceChildren(
       el("p", { class: "intro-res" }, "Le disque a choisi :"),
       el("div", { class: "album-choisi" },
-        album.pochette ? el("img", { src: album.pochette, alt: `Pochette de ${album.titre}`, onerror: (e) => e.target.remove() }) : null,
+        pochette(album),
         el("div", {},
           el("h3", {}, album.titre || "Sans titre"),
           el("p", { class: "artiste" }, album.artiste || ""),
-          el("p", { class: "prix" }, argent.format(album.prix))
+          el("p", { class: "prix" }, argent.format(prixFinal(album)) + (avecTaxes() ? " taxes incluses" : " avant taxes"))
         )
       ),
       el("div", { class: "rangee" },
@@ -527,6 +597,11 @@
   // ---------- Démarrage ----------
   $("form-budget").addEventListener("submit", (e) => { e.preventDefault(); tourner(); });
   $("budget").addEventListener("input", () => { if (!enRotation) majCandidats(); });
+  document.querySelectorAll(".taxes input").forEach((i) => i.addEventListener("change", () => {
+    if (enRotation) return;
+    majCandidats();
+    $("resultat").hidden = true;
+  }));
   window.addEventListener("resize", preparerCanvas);
   if (document.fonts) document.fonts.ready.then(dessiner);
 
@@ -536,7 +611,8 @@
   try {
     stockage = await creerStockage();
     stockage.ecouter((m) => {
-      achats = m || {};
+      achats = {};
+      for (const [code, info] of Object.entries(m || {})) if (PAR_CODE[code]) achats[PAR_CODE[code]] = info;
       if (!enRotation) majCandidats();
     });
   } catch (e) {
