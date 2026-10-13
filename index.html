@@ -1,0 +1,514 @@
+<!doctype html>
+<html lang="fr-CA">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ma liste de pige</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💿</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Young+Serif&family=Figtree:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --pin: #173A2F;
+    --pin-clair: #21493C;
+    --neige: #EEF2EC;
+    --neige-douce: rgba(238, 242, 236, .68);
+    --ligne: rgba(238, 242, 236, .16);
+    --canneberge: #B3263E;
+    --laiton: #C9A44C;
+    --sauge: #8FB39A;
+    --vinyle: #161616;
+    --serif: "Young Serif", Georgia, "Times New Roman", serif;
+    --sans: "Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    background: var(--pin);
+    color: var(--neige);
+    font-family: var(--sans);
+    font-size: 1.0625rem;
+    line-height: 1.55;
+    min-height: 100vh;
+  }
+  a { color: inherit; }
+  :focus-visible { outline: 3px solid var(--laiton); outline-offset: 3px; border-radius: 4px; }
+
+  .bandeau {
+    background: var(--laiton);
+    color: var(--vinyle);
+    padding: .6rem 1.25rem;
+    font-size: .95rem;
+  }
+
+  .page { max-width: 1120px; margin: 0 auto; padding: 0 1.25rem 4rem; }
+
+  .entete { padding: 3.5rem 0 1.5rem; max-width: 40rem; }
+  .entete h1 {
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: clamp(2.6rem, 7.5vw, 4.75rem);
+    line-height: 1;
+    letter-spacing: -.02em;
+    margin: 0 0 1rem;
+  }
+  .entete p { margin: 0; color: var(--neige-douce); font-size: 1.15rem; }
+
+  .scene {
+    display: grid;
+    gap: 2.5rem;
+    align-items: center;
+    padding: 1.5rem 0 3rem;
+  }
+  @media (min-width: 860px) {
+    .scene { grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 4rem; }
+  }
+
+  .roue-wrap {
+    position: relative;
+    width: 100%;
+    max-width: 480px;
+    margin: 0 auto;
+    aspect-ratio: 1;
+  }
+  #roue { width: 100%; height: 100%; display: block; }
+  .aiguille {
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0; height: 0;
+    border-left: 15px solid transparent;
+    border-right: 15px solid transparent;
+    border-top: 30px solid var(--laiton);
+    filter: drop-shadow(0 3px 2px rgba(0,0,0,.4));
+  }
+
+  form { display: grid; gap: .5rem; }
+  label { font-weight: 700; font-size: 1.05rem; }
+  .champ {
+    display: flex;
+    align-items: center;
+    background: var(--pin-clair);
+    border: 2px solid var(--ligne);
+    border-radius: 14px;
+    padding: 0 1rem;
+    max-width: 16rem;
+  }
+  .champ:focus-within { border-color: var(--laiton); }
+  .champ input {
+    flex: 1;
+    min-width: 0;
+    background: transparent;
+    border: 0;
+    color: var(--neige);
+    font-family: var(--serif);
+    font-size: 2.2rem;
+    padding: .35rem 0;
+  }
+  .champ input:focus { outline: none; }
+  .champ span { font-family: var(--serif); font-size: 1.8rem; color: var(--neige-douce); }
+  .compte { margin: .25rem 0 .75rem; color: var(--neige-douce); min-height: 1.55em; }
+
+  button, .bouton {
+    font: 700 1.05rem/1 var(--sans);
+    border-radius: 999px;
+    padding: .95rem 1.6rem;
+    cursor: pointer;
+    border: 2px solid transparent;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .4rem;
+  }
+  .principal { background: var(--laiton); color: var(--vinyle); justify-self: start; }
+  .principal:hover:not(:disabled) { background: #d8b45c; }
+  .secondaire { background: transparent; color: var(--neige); border-color: var(--ligne); }
+  .secondaire:hover { border-color: var(--neige-douce); }
+  .confirmer { background: var(--canneberge); color: var(--neige); }
+  .confirmer:hover:not(:disabled) { background: #c62f49; }
+  button:disabled { opacity: .45; cursor: not-allowed; }
+
+  .resultat {
+    margin-top: 2rem;
+    padding-top: 1.75rem;
+    border-top: 2px solid var(--laiton);
+  }
+  .resultat .intro-res { margin: 0 0 .75rem; color: var(--neige-douce); }
+  .album-choisi { display: flex; gap: 1.1rem; align-items: center; }
+  .album-choisi img {
+    width: 96px; height: 96px; object-fit: cover; border-radius: 6px; flex-shrink: 0;
+    box-shadow: 0 6px 18px rgba(0,0,0,.35);
+  }
+  .album-choisi h3 {
+    font-family: var(--serif); font-weight: 400;
+    font-size: clamp(1.6rem, 3.5vw, 2.1rem); line-height: 1.1; margin: 0;
+  }
+  .album-choisi .artiste { margin: .3rem 0 0; color: var(--neige-douce); }
+  .album-choisi .prix { margin: .3rem 0 0; font-weight: 700; color: var(--laiton); }
+  .rangee { display: flex; flex-wrap: wrap; gap: .6rem; margin-top: 1.25rem; }
+  .note { font-size: .92rem; color: var(--neige-douce); margin: .75rem 0 0; }
+  .message { margin: 1rem 0 0; font-weight: 500; }
+  .message.ok { color: var(--sauge); }
+  .message.erreur { color: #f08a9b; }
+
+  .liste h2 {
+    font-family: var(--serif); font-weight: 400;
+    font-size: clamp(1.8rem, 4vw, 2.5rem); margin: 0 0 1rem;
+  }
+  .liste ol { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--ligne); }
+  .liste li {
+    display: grid;
+    grid-template-columns: 2.25rem 1fr auto;
+    gap: .25rem 1rem;
+    align-items: baseline;
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--ligne);
+  }
+  .liste .num { font-family: var(--serif); color: var(--neige-douce); }
+  .liste .titre { font-weight: 700; }
+  .liste .artiste { color: var(--neige-douce); }
+  .liste .prix { font-weight: 700; white-space: nowrap; }
+  .liste .liens { grid-column: 2 / -1; display: flex; gap: 1.1rem; font-size: .95rem; }
+  .liste .liens a { color: var(--sauge); text-underline-offset: 3px; }
+  .liste li.pris .titre, .liste li.pris .prix { text-decoration: line-through; text-decoration-color: var(--canneberge); text-decoration-thickness: 2px; }
+  .liste li.pris { color: var(--neige-douce); }
+  .etat { color: var(--canneberge); font-weight: 700; font-size: .95rem; filter: brightness(1.5); }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; }
+  }
+</style>
+</head>
+<body>
+<div id="bandeau-demo" class="bandeau" hidden>
+  Mode test : Firebase n'est pas configuré, donc les albums cochés sont gardés seulement dans ce navigateur. Voir le README pour le partager avec tout le monde.
+</div>
+
+<div class="page">
+  <header class="entete">
+    <h1>Ma liste de pige</h1>
+    <p>Tu m'as pigé? Entre ton budget, fais tourner le disque, et il choisira un album pour toi parmi ceux qui restent.</p>
+  </header>
+
+  <main class="scene">
+    <div class="roue-wrap">
+      <canvas id="roue" role="img" aria-label="Disque qui tourne pour choisir un album"></canvas>
+      <div class="aiguille" aria-hidden="true"></div>
+    </div>
+
+    <section>
+      <form id="form-budget">
+        <label for="budget">Ton budget</label>
+        <div class="champ">
+          <input id="budget" type="text" inputmode="decimal" autocomplete="off" placeholder="30">
+          <span aria-hidden="true">$</span>
+        </div>
+        <p id="compte" class="compte" aria-live="polite"></p>
+        <button id="tourner" class="principal" type="submit">Faire tourner</button>
+      </form>
+      <div id="resultat" class="resultat" hidden aria-live="polite"></div>
+    </section>
+  </main>
+
+  <section class="liste">
+    <h2>Toute la liste</h2>
+    <ol id="liste"></ol>
+  </section>
+</div>
+
+<script src="config.js"></script>
+<script type="module">
+  const ALBUMS = (window.ALBUMS || []).map((a, i) => ({ ...a, id: String(a.id ?? "album-" + i), prix: Number(a.prix) || 0 }));
+  const argent = new Intl.NumberFormat("fr-CA", { style: "currency", currency: "CAD" });
+  const COULEURS = ["#B3263E", "#9C7B2E", "#4F7D62", "#7A3E5C", "#2F5F73"];
+  const mouvementReduit = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  const $ = (id) => document.getElementById(id);
+  const cv = $("roue"), ctx = cv.getContext("2d");
+
+  let achats = {};
+  let candidats = [];
+  let angle = 0;
+  let enRotation = false;
+  let stockage = null;
+
+  // ---------- Petit utilitaire pour créer des éléments ----------
+  function el(tag, attrs = {}, ...enfants) {
+    const n = document.createElement(tag);
+    for (const [k, v] of Object.entries(attrs)) {
+      if (v == null || v === false) continue;
+      if (k === "class") n.className = v;
+      else if (k.startsWith("on")) n.addEventListener(k.slice(2), v);
+      else n.setAttribute(k, v);
+    }
+    for (const e of enfants) if (e != null) n.append(e);
+    return n;
+  }
+  const lienExterne = (href, texte, cls) =>
+    href ? el("a", { href, target: "_blank", rel: "noopener", class: cls }, texte) : null;
+
+  // ---------- Stockage : Firebase si configuré, sinon local ----------
+  async function creerStockage() {
+    const cfg = window.FIREBASE_CONFIG;
+    if (cfg && cfg.apiKey) {
+      const V = "10.12.2";
+      const { initializeApp } = await import(`https://www.gstatic.com/firebasejs/${V}/firebase-app.js`);
+      const fs = await import(`https://www.gstatic.com/firebasejs/${V}/firebase-firestore.js`);
+      const db = fs.getFirestore(initializeApp(cfg));
+      return {
+        ecouter(cb) {
+          fs.onSnapshot(fs.collection(db, "achats"), (snap) => {
+            const m = {};
+            snap.forEach((d) => (m[d.id] = d.data()));
+            cb(m);
+          }, (err) => {
+            console.error(err);
+            $("compte").textContent = "Impossible de lire la liste partagée. Vérifie la configuration Firebase et les règles.";
+          });
+        },
+        async reserver(id) {
+          const ref = fs.doc(db, "achats", id);
+          return fs.runTransaction(db, async (t) => {
+            const s = await t.get(ref);
+            if (s.exists()) return false;
+            t.set(ref, { achete: true, date: fs.serverTimestamp() });
+            return true;
+          });
+        }
+      };
+    }
+
+    $("bandeau-demo").hidden = false;
+    const CLE = "pige-albums-achats";
+    let rappel = () => {};
+    const lire = () => { try { return JSON.parse(localStorage.getItem(CLE)) || {}; } catch { return {}; } };
+    return {
+      ecouter(cb) { rappel = cb; cb(lire()); },
+      async reserver(id) {
+        const m = lire();
+        if (m[id]) return false;
+        m[id] = { achete: true, date: Date.now() };
+        try { localStorage.setItem(CLE, JSON.stringify(m)); } catch {}
+        rappel(m);
+        return true;
+      }
+    };
+  }
+
+  // ---------- Budget et albums admissibles ----------
+  function lireBudget() {
+    const brut = $("budget").value.replace(",", ".").replace(/[^\d.]/g, "");
+    const n = parseFloat(brut);
+    return Number.isFinite(n) && n > 0 ? n : null;
+  }
+
+  function majCandidats() {
+    const budget = lireBudget();
+    const dispo = ALBUMS.filter((a) => !achats[a.id]);
+    candidats = budget == null ? dispo : dispo.filter((a) => a.prix <= budget);
+
+    let texte;
+    if (!ALBUMS.length) texte = "La liste est vide pour l'instant.";
+    else if (!dispo.length) texte = "Tous les albums ont déjà été choisis.";
+    else if (budget == null) texte = `${dispo.length} album${dispo.length > 1 ? "s" : ""} encore disponible${dispo.length > 1 ? "s" : ""}. Entre ton budget pour commencer.`;
+    else if (!candidats.length) texte = "Aucun album restant n'entre dans ce budget. Essaie un montant un peu plus élevé.";
+    else texte = `${candidats.length} album${candidats.length > 1 ? "s entrent" : " entre"} dans ton budget.`;
+    $("compte").textContent = texte;
+    $("tourner").disabled = budget == null || !candidats.length;
+    dessiner();
+  }
+
+  // ---------- Dessin du disque ----------
+  function preparerCanvas() {
+    const taille = cv.clientWidth;
+    const dpr = window.devicePixelRatio || 1;
+    cv.width = Math.round(taille * dpr);
+    cv.height = Math.round(taille * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    dessiner();
+  }
+
+  function tronquer(t, max) { return t.length > max ? t.slice(0, max - 1) + "…" : t; }
+
+  function dessiner() {
+    const s = cv.clientWidth;
+    if (!s) return;
+    const c = s / 2, r = s / 2 - 4;
+    ctx.clearRect(0, 0, s, s);
+
+    ctx.beginPath(); ctx.arc(c, c, r, 0, Math.PI * 2);
+    ctx.fillStyle = "#161616"; ctx.fill();
+
+    const n = candidats.length;
+    if (n) {
+      const seg = (Math.PI * 2) / n;
+      const taillePolice = Math.max(11, Math.min(16, s / (n > 10 ? 34 : 28)));
+      candidats.forEach((a, i) => {
+        const d = angle + i * seg;
+        ctx.beginPath(); ctx.moveTo(c, c); ctx.arc(c, c, r - 5, d, d + seg); ctx.closePath();
+        ctx.fillStyle = COULEURS[i % COULEURS.length];
+        if (n > 1 && n % COULEURS.length === 1 && i === n - 1) ctx.fillStyle = COULEURS[2];
+        ctx.fill();
+        if (n > 1) { ctx.strokeStyle = "#161616"; ctx.lineWidth = 2; ctx.stroke(); }
+
+        ctx.save();
+        ctx.translate(c, c);
+        ctx.rotate(d + seg / 2);
+        ctx.textAlign = "right"; ctx.textBaseline = "middle";
+        ctx.fillStyle = "#F3F1E8";
+        ctx.font = `700 ${taillePolice}px Figtree, system-ui, sans-serif`;
+        ctx.fillText(tronquer(a.titre || "Sans titre", n > 10 ? 14 : 20), r - 20, 0);
+        ctx.restore();
+      });
+    }
+
+    // Sillons du vinyle
+    ctx.strokeStyle = "rgba(0,0,0,.2)"; ctx.lineWidth = 1;
+    for (let rr = r * 0.3; rr < r - 6; rr += 4.5) {
+      ctx.beginPath(); ctx.arc(c, c, rr, 0, Math.PI * 2); ctx.stroke();
+    }
+    // Reflet
+    const reflet = ctx.createLinearGradient(0, 0, s, s);
+    reflet.addColorStop(0, "rgba(255,255,255,.10)");
+    reflet.addColorStop(.5, "rgba(255,255,255,0)");
+    reflet.addColorStop(1, "rgba(255,255,255,.06)");
+    ctx.beginPath(); ctx.arc(c, c, r, 0, Math.PI * 2); ctx.fillStyle = reflet; ctx.fill();
+
+    // Étiquette centrale
+    ctx.beginPath(); ctx.arc(c, c, r * 0.25, 0, Math.PI * 2);
+    ctx.fillStyle = "#EEF2EC"; ctx.fill();
+    ctx.fillStyle = "#173A2F";
+    ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    ctx.font = `${Math.round(s / 18)}px "Young Serif", Georgia, serif`;
+    ctx.fillText("pige", c, c - r * 0.1);
+    ctx.beginPath(); ctx.arc(c, c, Math.max(4, r * 0.03), 0, Math.PI * 2);
+    ctx.fillStyle = "#173A2F"; ctx.fill();
+  }
+
+  // ---------- Rotation ----------
+  function tourner() {
+    if (enRotation || !candidats.length) return;
+    const lot = candidats.slice();
+    const n = lot.length, seg = (Math.PI * 2) / n, tour = Math.PI * 2;
+    const gagnant = Math.floor(Math.random() * n);
+    const decalage = (Math.random() - 0.5) * seg * 0.6;
+    const cible = -Math.PI / 2 - (gagnant + 0.5) * seg + decalage;
+    let delta = (((cible - angle) % tour) + tour) % tour;
+    delta += tour * (mouvementReduit ? 1 : 5 + Math.floor(Math.random() * 3));
+    const depart = angle, duree = mouvementReduit ? 700 : 4800;
+
+    enRotation = true;
+    $("tourner").disabled = true;
+    $("resultat").hidden = true;
+
+    const t0 = performance.now();
+    function image(t) {
+      const p = Math.min(1, (t - t0) / duree);
+      angle = depart + delta * (1 - Math.pow(1 - p, 4));
+      dessiner();
+      if (p < 1) return requestAnimationFrame(image);
+      angle %= tour;
+      enRotation = false;
+      montrerResultat(lot[gagnant]);
+      majCandidats();
+    }
+    requestAnimationFrame(image);
+  }
+
+  // ---------- Résultat ----------
+  function montrerResultat(album) {
+    const zone = $("resultat");
+    const message = el("p", { class: "message" });
+    const confirmer = el("button", { class: "confirmer", type: "button" }, "Je l'achète");
+    const relancer = el("button", { class: "secondaire", type: "button", onclick: tourner }, "Tourner encore");
+    const choix = el("div", {},
+      el("div", { class: "rangee" }, confirmer, relancer),
+      el("p", { class: "note" }, "En confirmant, l'album sera retiré de la liste pour les autres.")
+    );
+
+    confirmer.addEventListener("click", async () => {
+      confirmer.disabled = true;
+      relancer.disabled = true;
+      let ok = false;
+      try { ok = await stockage.reserver(album.id); } catch (e) { console.error(e); ok = false; }
+      if (ok) {
+        choix.remove();
+        message.className = "message ok";
+        message.textContent = `C'est noté! « ${album.titre} » est maintenant retiré de la liste. Merci beaucoup!`;
+      } else {
+        message.className = "message erreur";
+        message.textContent = achats[album.id]
+          ? "Quelqu'un vient de choisir cet album. Fais tourner le disque de nouveau."
+          : "L'enregistrement n'a pas fonctionné. Vérifie ta connexion et réessaie.";
+        relancer.disabled = false;
+        if (!achats[album.id]) confirmer.disabled = false;
+      }
+    });
+
+    zone.replaceChildren(
+      el("p", { class: "intro-res" }, "Le disque a choisi :"),
+      el("div", { class: "album-choisi" },
+        album.pochette ? el("img", { src: album.pochette, alt: `Pochette de ${album.titre}` }) : null,
+        el("div", {},
+          el("h3", {}, album.titre || "Sans titre"),
+          el("p", { class: "artiste" }, album.artiste || ""),
+          el("p", { class: "prix" }, argent.format(album.prix))
+        )
+      ),
+      el("div", { class: "rangee" },
+        lienExterne(album.ecouter, "Écouter", "bouton secondaire"),
+        lienExterne(album.acheter, "Où l'acheter", "bouton secondaire")
+      ),
+      choix,
+      message
+    );
+    zone.hidden = false;
+  }
+
+  // ---------- Liste complète ----------
+  function afficherListe() {
+    $("liste").replaceChildren(...ALBUMS.map((a, i) => {
+      const pris = !!achats[a.id];
+      return el("li", { class: pris ? "pris" : null },
+        el("span", { class: "num" }, String(i + 1)),
+        el("div", {},
+          el("span", { class: "titre" }, a.titre || "Sans titre"), " ",
+          el("span", { class: "artiste" }, a.artiste ? `de ${a.artiste}` : "")
+        ),
+        el("span", { class: "prix" }, argent.format(a.prix)),
+        el("div", { class: "liens" },
+          pris ? el("span", { class: "etat" }, "Déjà choisi") : null,
+          lienExterne(a.ecouter, "Écouter"),
+          lienExterne(a.acheter, "Acheter")
+        )
+      );
+    }));
+  }
+
+  // ---------- Démarrage ----------
+  $("form-budget").addEventListener("submit", (e) => { e.preventDefault(); tourner(); });
+  $("budget").addEventListener("input", () => { if (!enRotation) majCandidats(); });
+  window.addEventListener("resize", preparerCanvas);
+  if (document.fonts) document.fonts.ready.then(dessiner);
+
+  preparerCanvas();
+  majCandidats();
+  afficherListe();
+
+  try {
+    stockage = await creerStockage();
+    stockage.ecouter((m) => {
+      achats = m || {};
+      afficherListe();
+      if (!enRotation) majCandidats();
+    });
+  } catch (e) {
+    console.error(e);
+    $("compte").textContent = "Impossible de se connecter à la liste partagée. Vérifie la configuration Firebase.";
+  }
+</script>
+</body>
+</html>
