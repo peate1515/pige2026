@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Ma liste de pige</title>
-<meta name="description" content="Entre ton budget, fais tourner le disque et découvre l'album à m'offrir.">
+<title>La liste de pige de Péa</title>
+<meta name="description" content="Tu as pigé Péa? Entre ton budget, fais tourner le disque et découvre l'album à lui offrir.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://peate1515.github.io/pige2026/">
-<meta property="og:title" content="Ma liste de pige">
-<meta property="og:description" content="Entre ton budget, fais tourner le disque et découvre l'album à m'offrir.">
+<meta property="og:title" content="La liste de pige de Péa">
+<meta property="og:description" content="Tu as pigé Péa? Entre ton budget, fais tourner le disque et découvre l'album à lui offrir.">
 <meta property="og:image" content="https://peate1515.github.io/pige2026/apercu.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -77,6 +77,7 @@
     color: var(--rose);
     text-shadow: 3px 3px 0 var(--orange), 6px 6px 0 var(--turquoise);
   }
+  .entete h1 .nom { color: var(--turquoise); text-shadow: 3px 3px 0 var(--orange), 6px 6px 0 var(--rose); }
   .entete p { margin: 0; color: var(--creme-douce); font-size: 1.15rem; max-width: 34rem; }
 
   .scene {
@@ -231,8 +232,8 @@
 
 <div class="page">
   <header class="entete">
-    <h1>Ma liste de pige</h1>
-    <p>Tu m'as pigé? Entre ton budget et fais tourner le disque. Il choisira pour toi un album qui entre dans ton budget.</p>
+    <h1>La liste de pige de <span class="nom">Péa</span></h1>
+    <p>Tu as pigé Péa? Entre ton budget et fais tourner le disque. Il choisira pour toi un album qui entre dans ton budget.</p>
   </header>
 
   <main class="scene">
@@ -588,7 +589,7 @@
 
   function recapitulatif(album, c) {
     const texte = [
-      `Mon cadeau de pige : ${album.titre} (${album.artiste})`,
+      `Mon cadeau de pige pour Péa : ${album.titre} (${album.artiste})`,
       `Prix : ${textePrix(c)} (en date du ${DATE_PRIX})`,
       album.acheter ? `Où l'acheter : ${album.acheter}` : null
     ].filter(Boolean).join("\n");
