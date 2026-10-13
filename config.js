@@ -67,6 +67,9 @@ window.ALBUMS = [
   {"id": "igor", "titre": "Igor", "artiste": "Tyler, the Creator", "prix": 32.64, "acheter": "https://www.amazon.ca/dp/B07T6S1CC1", "ecouter": "https://www.youtube.com/watch?v=Aztdmq1tYY8", "pochette": "https://m.media-amazon.com/images/I/81MJUW7iUaL._AC_SL1500_.jpg"}
 ];
 
+// Date à laquelle les prix ont été vérifiés (affichée sur le site)
+window.DATE_PRIX = "13 octobre 2026";
+
 // =====================================================================
 //  FIREBASE (pour que les albums cochés soient partagés entre tout le monde)
 //  Laisse à null pour tester : les albums cochés seront alors gardés

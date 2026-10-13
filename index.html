@@ -4,6 +4,17 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Ma liste de pige</title>
+<meta name="description" content="Entre ton budget, fais tourner le disque et découvre l'album à m'offrir.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://peate1515.github.io/pige2026/">
+<meta property="og:title" content="Ma liste de pige">
+<meta property="og:description" content="Entre ton budget, fais tourner le disque et découvre l'album à m'offrir.">
+<meta property="og:image" content="https://peate1515.github.io/pige2026/apercu.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:locale" content="fr_CA">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://peate1515.github.io/pige2026/apercu.png">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💿</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -196,6 +207,14 @@
   .message.ok { color: var(--turquoise); }
   .message.erreur { color: #FF9EC4; }
 
+ .recap {
+    margin-top: 1.25rem; padding: 1.1rem 1.25rem;
+    background: var(--fond-clair); border: 2px solid var(--ligne); border-radius: 18px;
+  }
+  .recap h4 { margin: 0 0 .5rem; font-size: 1rem; text-transform: uppercase; letter-spacing: .08em; color: var(--turquoise); }
+  .recap p { margin: .15rem 0; }
+  .recap .lien-achat { word-break: break-all; color: var(--turquoise); }
+  .recap + .recap { margin-top: .75rem; }
   .pied { margin-top: 3rem; }
 
   #confettis {
@@ -349,6 +368,7 @@
 
   // ---------- Budget et albums admissibles ----------
   const TAUX_TAXES = 1.15;
+  const DATE_PRIX = window.DATE_PRIX || "13 octobre 2026";
   const avecTaxes = () => $("avec-taxes").checked;
   const prixFinal = (a) => Math.round(a.prix * (avecTaxes() ? TAUX_TAXES : 1) * 100) / 100;
 
@@ -544,6 +564,59 @@
     return boite;
   }
 
+  // ---------- Mon choix : gardé sur l'appareil de la personne ----------
+  const CLE_MES_CHOIX = "pige-mes-choix";
+  function lireMesChoix() {
+    try { return JSON.parse(localStorage.getItem(CLE_MES_CHOIX)) || []; } catch { return []; }
+  }
+  function memoriserChoix(c) {
+    const liste = lireMesChoix().filter((x) => x.id !== c.id);
+    liste.push(c);
+    try { localStorage.setItem(CLE_MES_CHOIX, JSON.stringify(liste)); } catch {}
+  }
+  const textePrix = (c) => argent.format(c.prix) + (c.taxes ? " taxes incluses" : " avant taxes");
+
+  async function copier(texte) {
+    try { await navigator.clipboard.writeText(texte); return true; }
+    catch {
+      const zone = el("textarea", { style: "position:fixed;opacity:0" });
+      zone.value = texte; document.body.append(zone); zone.select();
+      let ok = false; try { ok = document.execCommand("copy"); } catch {}
+      zone.remove(); return ok;
+    }
+  }
+
+  function recapitulatif(album, c) {
+    const texte = [
+      `Mon cadeau de pige : ${album.titre} (${album.artiste})`,
+      `Prix : ${textePrix(c)} (en date du ${DATE_PRIX})`,
+      album.acheter ? `Où l'acheter : ${album.acheter}` : null
+    ].filter(Boolean).join("\n");
+    const bouton = el("button", { class: "secondaire", type: "button" }, "Copier le résumé");
+    bouton.addEventListener("click", async () => {
+      bouton.textContent = (await copier(texte)) ? "Copié!" : "Impossible de copier";
+      setTimeout(() => (bouton.textContent = "Copier le résumé"), 2200);
+    });
+    return el("div", { class: "recap" },
+      el("h4", {}, "Ton récapitulatif"),
+      el("p", {}, el("strong", {}, album.titre), ` de ${album.artiste}`),
+      el("p", {}, textePrix(c)),
+      album.acheter ? el("p", {}, el("a", { class: "lien-achat", href: album.acheter, target: "_blank", rel: "noopener" }, "Lien pour l'acheter")) : null,
+      el("div", { class: "rangee" }, bouton),
+      el("p", { class: "note" }, "Ce choix restera affiché sur cet appareil quand tu reviendras sur le site.")
+    );
+  }
+
+  function montrerMesChoix() {
+    const mes = lireMesChoix().map((c) => [ALBUMS.find((a) => a.id === c.id), c]).filter(([a]) => a);
+    if (!mes.length) return;
+    $("resultat").replaceChildren(
+      el("p", { class: "intro-res" }, mes.length > 1 ? "Les albums que tu as choisis :" : "L'album que tu as choisi :"),
+      ...mes.map(([a, c]) => recapitulatif(a, c))
+    );
+    $("resultat").hidden = false;
+  }
+
   // ---------- Résultat ----------
   function montrerResultat(album) {
     const zone = $("resultat");
@@ -564,6 +637,9 @@
         choix.remove();
         message.className = "message ok";
         message.textContent = `C'est noté! « ${album.titre} » est maintenant retiré du disque. Merci beaucoup!`;
+        const mien = { id: album.id, prix: prixFinal(album), taxes: avecTaxes() };
+        memoriserChoix(mien);
+        message.after(recapitulatif(album, mien));
       } else {
         message.className = "message erreur";
         message.textContent = achats[album.id]
@@ -581,7 +657,8 @@
         el("div", {},
           el("h3", {}, album.titre || "Sans titre"),
           el("p", { class: "artiste" }, album.artiste || ""),
-          el("p", { class: "prix" }, argent.format(prixFinal(album)) + (avecTaxes() ? " taxes incluses" : " avant taxes"))
+          el("p", { class: "prix" }, argent.format(prixFinal(album)) + (avecTaxes() ? " taxes incluses" : " avant taxes")),
+          el("p", { class: "note" }, `Prix Amazon en date du ${DATE_PRIX}. Il a peut-être changé depuis.`)
         )
       ),
       el("div", { class: "rangee" },
@@ -601,11 +678,13 @@
     if (enRotation) return;
     majCandidats();
     $("resultat").hidden = true;
+    montrerMesChoix();
   }));
   window.addEventListener("resize", preparerCanvas);
   if (document.fonts) document.fonts.ready.then(dessiner);
 
   preparerCanvas();
+  montrerMesChoix();
   majCandidats();
 
   try {
